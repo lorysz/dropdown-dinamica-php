@@ -1,0 +1,44 @@
+// ====================== OBSERVAÇÃO ============================
+/*
+Deve chamar a lista de estado quando carregar a página, se não vai dar problema.
+*/
+
+//======================= HTML ==================================
+<!-- a combo só precisará do ID, o javascript vai montar a combo
+ <label>Cidade de saída:</label>
+ <select id="id_cidadeSaida" name="id_cidadeSaida" class="form-control">
+     <option value="0">Selecione</option>
+ </select>
+
+
+//======================== JAVASCRIPT ================================
+<script type="text/javascript">
+//quando o valor da combo de estado alterar ele vai executar essa linha
+    $('#id_estadoSaida').change(function () {
+	//armazenando o valor do codigo do estado
+        var valor = document.getElementById("id_estadoSaida").value;
+		//chamada da controller e passando o ID estado via GET
+        $.get('../Controller/cidade.php?search=' + valor, function (data) {
+		//procurando a tag OPTION com id da cidade e removendo 
+            $('#id_cidadeSaida').find("option").remove();
+			//motando a combo da cidade
+            $('#id_cidadeSaida').append(data);
+        });
+    });
+</script>
+
+// ======================== CONTROLLER =============================
+//Controller para receber via GET o valor do id do estado
+if (isset($_GET['search'])) {
+    $cod_estados = $_GET['search'];
+    $obj = new CidadeDao();
+	//chamando a DAO para listar as cidades de acordo com o id do estado selecionado
+    $obj->ListarCidade($cod_estados);
+	//recebe o resultado da consulta
+    $recebe = $obj->getResultado();
+//faz um loop para montar linha por linha da combo de cidade
+    for ($i = 0; $i < count($recebe); $i++) {
+	// devolvendo a linha HTML para o javascript e montar no append
+        echo "<option value='" . $recebe[$i]['cod_cidade'] . "' >" . $recebe[$i]['nome_cidade'] . "</option>";
+    }
+}
